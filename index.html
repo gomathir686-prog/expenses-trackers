@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Expense Tracker</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#74ebd5,#ACB6E5);
+    margin:0;
+}
+
+header{
+    background:#2c3e50;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+
+.container{
+    width:500px;
+    max-width:90%;
+    background:white;
+    margin:30px auto;
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 0 15px gray;
+}
+
+h2{
+    text-align:center;
+}
+
+input,select,button{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    box-sizing:border-box;
+}
+
+.add-btn{
+    background:green;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+.clear-btn{
+    background:red;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+.delete-btn{
+    background:red;
+    color:white;
+    border:none;
+    width:auto;
+    padding:5px 10px;
+    margin-left:10px;
+    cursor:pointer;
+}
+
+ul{
+    padding:0;
+}
+
+li{
+    list-style:none;
+    background:#f4f4f4;
+    padding:10px;
+    margin-top:5px;
+    border-radius:5px;
+}
+
+footer{
+    background:#2c3e50;
+    color:white;
+    text-align:center;
+    padding:10px;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Expense Tracker </h1>
+</header>
+
+<div class="container">
+
+<h2>Track Your Expenses</h2>
+
+<input type="text"
+id="description"
+placeholder="Enter Description">
+
+<input type="number"
+id="amount"
+placeholder="Enter Amount">
+
+<select id="type">
+<option value="Income">Income</option>
+<option value="Expense">Expense</option>
+</select>
+
+<button class="add-btn"
+onclick="addTransaction()">
+Add Transaction
+</button>
+
+<button class="clear-btn"
+onclick="clearHistory()">
+Clear History
+</button>
+
+<input type="text"
+id="search"
+placeholder="Search Transaction"
+onkeyup="searchTransaction()">
+
+<h3>Total Income : ₹<span id="income">0</span></h3>
+<h3>Total Expense : ₹<span id="expense">0</span></h3>
+<h3>Balance : ₹<span id="balance">0</span></h3>
+<h3>Total Transactions :
+<span id="count">0</span></h3>
+
+<h3>Transaction History</h3>
+
+<ul id="history"></ul>
+
+</div>
+
+<footer>
+<p>© 2026 Expense Tracker</p>
+</footer>
+
+<script>
+
+let transactions =
+JSON.parse(localStorage.getItem("transactions")) || [];
+
+function updateUI(){
+
+let history =
+document.getElementById("history");
+
+history.innerHTML="";
+
+let income=0;
+let expense=0;
+
+transactions.forEach((item,index)=>{
+
+let li=document.createElement("li");
+
+li.innerHTML=
+item.date+" | "+
+item.type+" - "+
+item.description+
+" ₹"+item.amount;
+
+let deleteBtn=
+document.createElement("button");
+
+deleteBtn.innerText="Delete";
+deleteBtn.className="delete-btn";
+
+deleteBtn.onclick=function(){
+
+transactions.splice(index,1);
+
+localStorage.setItem(
+"transactions",
+JSON.stringify(transactions)
+);
+
+updateUI();
+};
+
+li.appendChild(deleteBtn);
+
+history.appendChild(li);
+
+if(item.type==="Income"){
+income+=item.amount;
+}
+else{
+expense+=item.amount;
+}
+
+});
+
+document.getElementById("income").innerText=
+income;
+
+document.getElementById("expense").innerText=
+expense;
+
+document.getElementById("balance").innerText=
+income-expense;
+
+document.getElementById("count").innerText=
+transactions.length;
+}
+
+function addTransaction(){
+
+let description=
+document.getElementById("description").value;
+
+let amount=
+parseFloat(
+document.getElementById("amount").value
+);
+
+let type=
+document.getElementById("type").value;
+
+if(
+description==="" ||
+isNaN(amount) ||
+amount<=0
+){
+alert("Please enter valid details");
+return;
+}
+
+let transaction={
+description:description,
+amount:amount,
+type:type,
+date:new Date().toLocaleString()
+};
+
+transactions.push(transaction);
+
+localStorage.setItem(
+"transactions",
+JSON.stringify(transactions)
+);
+
+updateUI();
+
+document.getElementById("description").value="";
+document.getElementById("amount").value="";
+}
+
+function clearHistory(){
+
+transactions=[];
+
+localStorage.removeItem("transactions");
+
+updateUI();
+}
+
+function searchTransaction(){
+
+let input=
+document.getElementById("search")
+.value.toLowerCase();
+
+let items=
+document.querySelectorAll("#history li");
+
+items.forEach(item=>{
+
+if(
+item.textContent
+.toLowerCase()
+.includes(input)
+){
+item.style.display="";
+}
+else{
+item.style.display="none";
+}
+
+});
+
+}
+
+updateUI();
+
+</script>
+
+</body>
+</html>
